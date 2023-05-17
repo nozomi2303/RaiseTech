@@ -4,9 +4,9 @@
 
 
 ## VPCの作成  
-![vpc](img src="images/rt-vpc.png")  
-![vpc-subnet](img src="images/rt-rute.png")  
-![vpc-security](img src="images/rt-vpc-security.png")  
+![vpc](images/rt-vpc.png)  
+![vpc-subnet](images/rt-rute.png)  
+![vpc-security](images/rt-vpc-security.png)  
 - 東京リージョン内で作成する。サブネットも自動作成。  
 セキュリティグループ、インバウンドルールも設定。  
 
@@ -14,7 +14,7 @@
 ***
 
 ## EC2の作成  
-![ec2](img src="images/rt-ec2.png")  
+![ec2](images/rt-ec2.png)  
 - EC2は **Linux2** で作成し、先に設置したVPC内に配置する。  
 今回はVPC内に作成し忘れてしまう、Linux2023で作成してしまうというミスのため、3度目の正直で完成。  
 
@@ -22,8 +22,8 @@
 ***
 
 ## RDSの作成  
-![rds](img src="images/rt-rds.png")  
-![rds-ec2](img src="images/rds-ec2-2.png")  
+![rds](images/rt-rds.png)  
+![rds-ec2](images/rds-ec2-2.png)  
 - RDSは **MySQL** で作成。  
 バックアップ設定などで容量を大量消費してしまい、無料利用枠を大幅に超えてしまった為、2度目の作成。    
 EC2とRDSはコンソール内で接続が出来る。  
@@ -32,7 +32,7 @@ EC2とRDSはコンソール内で接続が出来る。
 ***
 
 ## EC2からRDSへの接続
-![ec2-rds](img src="images/ec2rdsconnect.png")  
+![ec2-rds](images/ec2rdsconnect.png)  
 - TeraTermでEC2へSSH接続をし、`mysql -u admin -p -h`のコマンドの後ろへRDSのエンドポイントをペーストして実行する。  
 パスワードを入力し、EC2からRDSのMySQLへログイン完了。  
 
