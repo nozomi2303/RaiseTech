@@ -5,9 +5,11 @@
 
 ## VPCの作成  
 ![vpc](images/rt-vpc.png)  
-![vpc-subnet](images/rt-rute.png)  
+![vpc-subnet](images/rt-vpc-rute.png)  
 ![vpc-security](images/rt-vpc-security.png)  
-- 東京リージョン内で作成する。サブネットも自動作成。  
+- VPC(Virtual Private Cloud)は仮想ネットワーク。  
+東京リージョン内で作成する。  
+VPCの中にサブネット、外部と接続するためのインターネットゲートウェイが自動で作成される。  
 セキュリティグループ、インバウンドルールも設定。  
 
 
@@ -15,8 +17,11 @@
 
 ## EC2の作成  
 ![ec2](images/rt-ec2.png)  
-- EC2は **Linux2** で作成し、先に設置したVPC内に配置する。  
-今回はVPC内に作成し忘れてしまう、Linux2023で作成してしまうというミスのため、3度目の正直で完成。  
+- EC2(Elastic Compute Cloud)はサーバー向けコンピュータ。  
+**Linux2** で作成し、先に設置したVPC内に配置する。  
+キーペアもここで作成する。  
+今回はVPC内に作成し忘れてしまう、Linux2023で作成してしまうというミスのために3度目も作成してしまったので、今後は気を付けたい。  
+
 
 
 ***
@@ -24,7 +29,8 @@
 ## RDSの作成  
 ![rds](images/rt-rds.png)  
 ![rds-ec2](images/rds-ec2-2.png)  
-- RDSは **MySQL** で作成。  
+- RDS(Relational Database Service)はデータベースサーバー。  
+PostgreSQLやOracle、AmazonのAuroraなどあるが **MySQL** で作成。  
 バックアップ設定などで容量を大量消費してしまい、無料利用枠を大幅に超えてしまった為、2度目の作成。    
 EC2とRDSはコンソール内で接続が出来る。  
 
