@@ -4,43 +4,47 @@
 
 
 ## VPCの作成  
-![vpc](images/rt-vpc.png)  
-![vpc-subnet](images/rt-vpc-rute.png)  
-![vpc-security](images/rt-vpc-security.png)  
+![vpc](images/rt-vpc.png)    
 - VPC(Virtual Private Cloud)は仮想ネットワーク。  
 東京リージョン内で作成する。  
-VPCの中にサブネット、外部と接続するためのインターネットゲートウェイが自動で作成される。  
-セキュリティグループ、インバウンドルールも設定。  
+VPCの中にサブネット、外部と接続するためのインターネットゲートウェイが自動で作成される。    
 
 
 ***
 
 ## EC2の作成  
 ![ec2](images/rt-ec2.png)  
+![ec2-security](images/ec2-security-0520.png)
+
 - EC2(Elastic Compute Cloud)はサーバー向けコンピュータ。  
 **Linux2** で作成し、先に設置したVPC内に配置する。  
 キーペアもここで作成する。  
 今回はVPC内に作成し忘れてしまう、Linux2023で作成してしまうというミスのために3度目も作成してしまったので、今後は気を付けたい。  
-
+EC2インスタンスのセキュリティグループでインバウンドルールを設定。
 
 
 ***
 
 ## RDSの作成  
-![rds](images/rt-rds.png)  
-![rds-ec2](images/rds-ec2-2.png)  
+![rds](images/rds-1-0520.png)  
+![rds-security](images/rds-3-0520.png)  
+![rds-subnet](images/rds-subnet-0520.png)
+![rds-ec2-connect](images/rds-4-0520.png)  
 - RDS(Relational Database Service)はデータベースサーバー。  
 PostgreSQLやOracle、AmazonのAuroraなどあるが **MySQL** で作成。  
-バックアップ設定などで容量を大量消費してしまい、無料利用枠を大幅に超えてしまった為、2度目の作成。    
-EC2とRDSはコンソール内で接続が出来る。  
-
+バックアップ設定などで容量を大量消費してしまい、無料利用枠を大幅に超えてしまった為、2度目の作成。  
+RDS2度目の作成時にサブネット設定を間違えてしまい再作成。  
+RDS作成後にRDSからEC2への接続。
+EC2とRDSのセキュリティグループ設定を分けましょうという指示を頂いたので、RDSでセキュリティグループを設定。  
+「セキュリティグループ」「サブネット」「サブネットグループ」の理解が出来ておらず、中々苦しかった。
 
 ***
 
 ## EC2からRDSへの接続
-![ec2-rds](images/ec2rdsconnect.png)  
+![teraterm](images/rds-mysql-0520.png)  
 - TeraTermでEC2へSSH接続をし、`mysql -u admin -p -h`のコマンドの後ろへRDSのエンドポイントをペーストして実行する。  
 パスワードを入力し、EC2からRDSのMySQLへログイン完了。  
+再作成したRDSへのアクセス動作確認済み。  
 
 ***
 
@@ -57,6 +61,10 @@ RDSもバックアップかどこかの設定を間違えたようで、結局�
 もう一つ課金されてしまっていたのがEIPで、EIPも関連付けている間は無料だけど、関連付けたままEC2を停止しているとその停止している最中に課金されるとのこと。  
 ログアウトする前には必ずEC2、RDS、EIPの停止と解除は必須であることを身を持って学んだ。  
 他にもあるのかもしれない。無料利用枠を超えるとしても千円以内には抑えたいところ。  
+サブネット、サブネットグループ、セキュリティグループ、のそれぞれのイメージ、対VPCとEC2、RDSへの設定の必要性など、まだまだ理解が出来ていない。  
+単純に言葉だけの意味ではなく、それがどういうイメージなのか頭の中で絵が描けていない。  
+もう一度しっかり復習したい。  
+
 
 
 - 動作確認が一番の山。  
