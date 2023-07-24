@@ -3,16 +3,19 @@
 ### CloudTrailのログからイベントを確認する。  
   
 CloudWatchアラームでメール通知設定した際のログ  
-* "eventName":"DescribeAlarms"
+* "eventName":"DescribeAlarms"  
     * イベント名…リクエストされたアクション。アラームの説明。  
 <br>
+
 * "eventSource":"monitoring.amazonaws.com"  
     * イベントソース…リクエストが行われたサービス。サービス名の短縮形（ec2など）に.amazonaws.comを付けたもの。CloudWatchの場合は例外としてmonitoringになる。イベントソースとはイベント発生元となるAWSリソースで、ユーザーが操作できるエンティティのこと。エンティティとは、人や場所、商品などのオブジェクト固有の名前をテキスト参照したり日付や数量などの測定値を正確に参照すること。  
 <br>
-* "eventType":"AwsApiCall"
+
+* "eventType":"AwsApiCall"  
     * イベントタイプ…イベントレコードを生成したイベントタイプの識別。AwsApiCallは、APIが呼び出されたことを差す。  
 <br>
-* "eventCategory":"Management"
+
+* "eventCategory":"Management"  
     * イベントカテゴリ…LookupEventコールで使用されるイベントカテゴリ。Managementは管理イベントのこと。LookupEventとは、CloudTrailによってキャプチャされた管理イベントのこと。  
 
 
