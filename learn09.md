@@ -18,6 +18,10 @@
 「rootとlocationの指定が間違えていた」  
 この2点が原因だったのではと思います。設定ファイルの記述方法を理解するのがとても難しかったので、この設定に一番時間が掛かってしまいました。  
 
+
+### Linuxのコマンド実行で使うserviceとsystemctlの違いとは何か？  
+
+
 * 起動コマンドが異なったので比べてみるのと同時に、改めてどういう意味なのかを調べてみました。  
   
     * Unicorn
@@ -46,4 +50,4 @@ Nginx起動コマンドに関しては両者ともよく使われている起動
 引き続き学習を深めながら次回の課題へ進みたいと思います。
 
 
-[参考にしたページ：Linuxのコマンド実行で使うserviceとsystemctlの違いとは何か？](https://code-bug.net/qfr8l41pigu2v05ztwbc/)
+[参考にしたページ：Linuxのコマンド実行で使うserviceとsystemctlの違いとは何か？](https://code-bug.net/qfr8l41pigu2v05ztwbc/)  
