@@ -1,0 +1,521 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Lecture10 Create Base from CFn
+
+Parameters: 
+  cfnBase:
+    Description: this is VPC base name.
+    Type: String
+    Default: fromCFn
+  VPCcider:
+    Type: String
+    Default: 10.0.0.0/16
+  PBSubnetcider01:
+    Type: String
+    Default: 10.0.16.0/24
+  PBSubnetcider02: 
+    Type: String
+    Default: 10.0.2.0/24
+  PVSubnetcider03: 
+    Type: String
+    Default: 10.0.128.0/24
+  PVSubnetcider04: 
+    Type: String
+    Default: 10.0.144.0/24
+  EC2Base:
+    Description: this is EC2 base name.
+    Type: String
+    Default: fromCFn-railsAP
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+       - "t2.micro"
+       - "m1.small"
+       - "m1.large"
+    Description: Default t2.micro
+  KeyName:
+    Description: EC2KeyPair
+    Type: 'AWS::EC2::KeyPair::KeyName'
+  MyIP:
+    Description: My IP adress
+    Type: String
+  LatestAmiId :
+    Type : AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+  SGBase:
+    Description: this is SecurityGroup.
+    Type: String
+    Default: fromCFn
+  RDSmasteruser:
+    Description: RDS master user name
+    Type: String
+    Default: admin 
+  RDSpassword:
+    Description: RDS user PassWord
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 128
+    AllowedPattern: "[a-zA-Z0-9]*"
+
+Resources: 
+
+#--------------------------------------------#
+# VPC
+#--------------------------------------------#
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCcider                     #CidrBlockまたはIpv4IpamPoolIdのいずれかを指定しなければならない
+      EnableDnsSupport: true                       #VPC で起動したインスタンスが DNS ホスト名を取得するかどうかを示す
+      EnableDnsHostnames: true                     #VPCでDNS解決がサポートされているかどうかを示す
+      Tags:
+        - Key: Name
+          Value: !Sub VPC-${cfnBase}
+
+#--------------------------------------------#
+# PublicSubnet
+#--------------------------------------------#
+  MyPBSubnet01:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-northeast-1a
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref PBSubnetcider01               #サブネットに割り当てられたIPv4 CIDRブロック。更新すると新しいsubnetが作成され、既存のsubnetは削除される
+      MapPublicIpOnLaunch: true                   #PVSubnetで起動されたインスタンスがパブリックIPv4アドレスを受け取るかどうか
+      Tags:
+        - Key: Name
+          Value: !Sub MyPBSubnet01-${cfnBase}
+  MyPBSubnet02:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-northeast-1c
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref PBSubnetcider02
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub MyPBSubnet02-${cfnBase}
+#--------------------------------------------#
+# PrivateSubnet
+#--------------------------------------------#
+  MyPVSubnet03:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-northeast-1a            #必須ではない
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref PVSubnetcider03              #サブネットに割り当てられたIPv4 CIDRブロック。更新すると新しいsubnetが作成され、既存のsubnetは削除される
+      MapPublicIpOnLaunch: false                   #PVSubnetで起動されたインスタンスがパブリックIPv4アドレスを受け取るかどうか
+      Tags:
+        - Key: Name
+          Value: !Sub MyPVSubnet03-${cfnBase}
+
+  MyPVSubnet04:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-northeast-1c
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref PVSubnetcider04
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub MyPVSubnet04-${cfnBase}
+
+#--------------------------------------------#
+# InternetGateWay
+#--------------------------------------------#
+  MyIGW:
+    Type: AWS::EC2::InternetGateway                #VPCで使用するIGWを割り当てる
+    Properties:
+      Tags:
+        - Key: Name
+          Value: MyIGW
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment           #IGWをVPCにアタッチし、インターネットとVPC間の接続を可能にする
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref MyIGW
+
+#--------------------------------------------#
+# RoutTable for public subnet
+#--------------------------------------------#
+  MyRouteTable:
+    Type: AWS::EC2::RouteTable                     #指定したVPCのRTを指定。RTを作成した後、ルートを追加してテーブルをサブネットに関連付けることができる
+    Properties:
+      VpcId: !Ref MyVPC
+      Tags:
+        - Key: Name
+          Value: MyRouteTablepublic
+
+#--------------------------------------------#
+# RoutTable for private subnet
+#--------------------------------------------#
+  MyRouteTableprivate:
+    Type: AWS::EC2::RouteTable                     #指定したVPCのRTを指定。RTを作成した後、ルートを追加してテーブルをサブネットに関連付けることができる
+    Properties:
+      VpcId: !Ref MyVPC
+      Tags:
+        - Key: Name
+          Value: MyRouteTableprivate
+
+#--------------------------------------------#
+# RoutTable for InternetGateWay
+#--------------------------------------------#
+  MyRoutetoIGW:
+    Type: AWS::EC2::Route                          #インターネットへ抜けられるようにするためのルートを作成
+    Properties:
+      RouteTableId: !Ref MyRouteTable
+      DestinationCidrBlock: 0.0.0.0/0              # 宛先一致に使用されるIPv4 CIDRアドレスブロック
+      GatewayId: !Ref MyIGW                        # VPCに接続されているインターネットゲートウェイID
+
+#--------------------------------------------#
+# RoutTable  Subnet Association
+#--------------------------------------------#
+  RouteTableAssocPublic01:
+    Type: AWS::EC2::SubnetRouteTableAssociation    #サブネットとルートテーブルを関連付ける
+    Properties:
+      SubnetId: !Ref MyPBSubnet01
+      RouteTableId: !Ref MyRouteTable
+
+  RouteTableAssocPublic02:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPBSubnet02
+      RouteTableId: !Ref MyRouteTable
+
+  RouteTableAssocPrivate03:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPVSubnet03
+      RouteTableId: !Ref MyRouteTableprivate
+
+  RouteTableAssocPrivate04:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPVSubnet04
+      RouteTableId: !Ref MyRouteTableprivate
+
+#--------------------------------------------#
+# Aplication Load Balancer
+#--------------------------------------------#
+  MyALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer #ALB NLB GLBを指定。V2が付いていないものはクラシックタイプなので注意
+    Properties:
+      Name: MyALB                                  #ロードバランサーの名前。この名前は、アカウントごとにリージョンごとに一意でなければならない
+      Scheme: internet-facing                      #ALB を内部/外部用にするかを指定する、今回は外部用
+      IpAddressType: ipv4
+      SecurityGroups:                              #ALBにアタッチするSecurity GroupのIDを指定
+        - !Ref MyALBSG
+      Subnets:                                     #EC2をデプロイするサブネットIDを指定。ALBでは2つ以上のサブネットにデプロイする必要がある
+        - !Ref MyPBSubnet01
+        - !Ref MyPBSubnet02
+      Tags:
+        - Key: Name
+          Value: !Sub MyALB-${cfnBase}
+
+#--------------------------------------------#
+# TargetGroup
+#--------------------------------------------#
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup  #ターゲットグループ
+    Properties:
+      VpcId: !Ref MyVPC                            #VPCの識別子。ターゲットがラムダ関数以外の場合は、このパラメータは必須
+      Name: TargetGroup
+      IpAddressType: ipv4
+      Protocol: HTTP
+      ProtocolVersion: HTTP1
+      TargetType: instance
+      Port: 80
+      HealthCheckProtocol: HTTP                    #ロードバランサーがターゲットに対してヘルスチェックを行うときに使用するプロトコル
+      HealthCheckPath: /                           #ターゲットのヘルスチェックの宛先
+      HealthCheckPort: traffic-port                #ロードバランサーがターゲットのヘルスチェックを行うときに使用するポート。プロトコルがHTTPならデフォルトはtraffic-port
+      HealthyThresholdCount: 5                     #ターゲットがヘルシーであると判断するまでに必要な、連続したヘルスチェックの成功回数。2～10の範囲で指定
+      UnhealthyThresholdCount: 2
+      HealthCheckTimeoutSeconds: 5                 #ターゲットからの応答がない間、ヘルスチェックに失敗したことを意味する時間（秒）。範囲は2-120秒
+      HealthCheckIntervalSeconds: 30               #個々のターゲットのヘルスチェック間のおおよその時間（秒）。範囲は5-300
+      Matcher:                                     #ターゲットからの正常応答をチェックするときに使用するHTTPまたはgRPCコード
+           HttpCode: 200-399
+      Targets:
+           - Id: !Ref MyEC2
+             Port: 80
+      Tags:
+        - Key: Name
+          Value: !Sub MyTargetGroup-${cfnBase}
+
+#--------------------------------------------#
+# ALB Listner
+#--------------------------------------------#
+  MyALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener    #リスナーを指定
+    Properties:
+      Port: 80                                     #リッスンポート
+      Protocol: HTTP                               #クライアントからロードバランサーへの接続プロトコル 
+      DefaultActions:                              #必須項目、デフォルトルールのアクション。デフォルトルールに条件を定義することはできない
+         - TargetGroupArn: !Ref TargetGroup
+           Type: forward
+      LoadBalancerArn: !Ref MyALB                  #必須項目、ロードバランサーの Amazon Resource Name (ARN)  
+
+#--------------------------------------------#
+# ALB SG
+#--------------------------------------------#
+  MyALBSG:
+    Type: AWS::EC2::SecurityGroup                  #セキュリティグループを指定する
+    Properties:
+      GroupName: MyALBSG                           #セキュリティグループの名前
+      GroupDescription: MyALBSG                    #必須項目、セキュリティグループの説明
+      VpcId: !Ref MyVPC                            #セキュリティグループを作るVPCのID
+      SecurityGroupIngress:                        #インバウンドルール
+        - IpProtocol: tcp                          #必須項目、IPプロトコル名
+          FromPort: 80                             #プロトコルがTCPまたはUDPの場合、ポート範囲の開始位置
+          ToPort: 80                               #プロトコルがTCPまたはUDPの場合、ポート範囲の終端
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub MyALBSG-${cfnBase}
+
+#--------------------------------------------#
+# EC2
+#--------------------------------------------#
+  MyEC2:
+    Type: AWS::EC2::Instance                         #EC2インスタンスを指定
+    Properties:
+      BlockDeviceMappings:                           #インスタンス起動時に使用するEBSを指定
+        - DeviceName: /dev/xvda                      #ルートデバイス名
+          Ebs:                                       #EBSの設定
+            DeleteOnTermination: true                #インスタンス終了時にEBSを削除する設定
+            VolumeSize: 20                           #ボリュームサイズの指定
+            VolumeType: gp2                          #ボリュームタイプの指定
+      KeyName: !Ref KeyName                          #キーペアの名前。CreateKeyPairまたはImportKeyPairを使用してキーペアを作成
+      DisableApiTermination: false                   #このパラメータをtrueに設定すると、Amazon EC2 コンソール、CLI、またはAPIを使用してインスタンスを終了できなくなる。それ以外の場合は可能
+      ImageId: !Ref LatestAmiId                      #インスタンスを起動するAMIID
+      InstanceType: !Ref InstanceTypeParameter       #インスタンスのタイプ
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId: !Ref MyPBSubnet01                #インスタンスを起動するサブネットのID 
+          GroupSet: 
+            - !Ref MyEC2SG                           #ネットワークインターフェースに関連付けられたセキュリティグループ ID
+            - !Ref MyEC2SGtoRDS                                
+      UserData: !Base64 |                             #インスタンスで使用できるようにするユーザーデータスクリプト。インスタンスの起動時にのみ実行される
+        #!/bin/bash -ex
+        sudo yum install -y git                       #Gitをインストール
+        sudo yum update -y                            #EC2のアップデート
+        sudo timedatectl set-timezone Asia/Tokyo      #タイムゾーンを設定
+        yum install -y aws-cfn-bootstrap              #最新のヘルパースクリプトをインストール
+        sudo yum install mysql                        #mysqlをインストール
+      IamInstanceProfile: !Ref MyEC2InstanceProfile   #IAMインスタンスプロファイルを指定
+      Tags:
+        - Key: Name
+          Value: !Sub MyEC2-${EC2Base}
+
+#--------------------------------------------#
+# EC2 InstanceProfile
+#--------------------------------------------#
+  MyIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MyIamRole
+      AssumeRolePolicyDocument:                #EC2にロールの権限を付与 
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole                  #IAMロールを引き受けるためのアクション。stsとはSecurity Token Service
+      Path: /
+      ManagedPolicyArns:                        #IAMポリシーを指定
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+  MyEC2InstanceProfile:                            #インスタンスプロファイルを作成する。EC2インスタンスとIAMロールを繋ぐコネクタのようなもの。
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      Path: /
+      Roles: 
+        - !Ref MyIamRole                           #IAMロールを指定
+
+#--------------------------------------------#
+# EC2 SG
+#--------------------------------------------#
+  MyEC2SG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: MyEC2SG
+      GroupDescription: MyEC2SG
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref MyALBSG       #ALBのセキュリティグループIDを指定
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub MyEC2SG-${cfnBase}
+
+  MyEC2SGtoRDS:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: MyEC2SGtoRDS
+      GroupDescription: EC2 access port to RDS
+      VpcId: !Ref MyVPC
+      SecurityGroupEgress: 
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          DestinationSecurityGroupId: !Ref RDSEC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub MyEC2SGto-RDS-${cfnBase}
+
+#--------------------------------------------#
+# RDS for MySQL
+#--------------------------------------------#
+  MyRDS:
+    Type: AWS::RDS::DBInstance                     #Amazon DB instance
+    Properties:
+      DBInstanceIdentifier: Learn10RDSfromCFn      #インスタンス識別子
+      AllocatedStorage: 20                         #最初に割り当てられるストレージの量 
+      DBInstanceClass: db.t2.micro
+      AllowMajorVersionUpgrade: true               #メジャーアップグレードするかどうか
+      AvailabilityZone: ap-northeast-1a
+      BackupRetentionPeriod: 0                     #バックアップ保持期間、0にすると無効になる
+      DBName: Learn10RDSfruitsapp                  #インスタンスの作成時に作成するデータベース名。このパラメータを指定しない場合、DBインスタンスにデータベースは作成されない
+      DBSubnetGroupName: !Ref RDSSubnetGroup
+      Engine: Mysql
+      EngineVersion: 8.0.34
+      MasterUsername: !Ref RDSmasteruser           #MySQLでは必須、最初の文字は文字でなければならない
+      MasterUserPassword: !Ref RDSpassword
+      PubliclyAccessible: false                    #パブリックアクセスが可能かどうか
+      StorageType: gp2                             #DBインスタンスに関連付けるストレージ・タイプ
+      VPCSecurityGroups:                           #DBSecurityGroupsを設定してはならない
+        - !Ref RDSEC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub MyRDS-${cfnBase}
+
+#--------------------------------------------#
+# RDS Security Group
+#--------------------------------------------#
+  RDSEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: RDS access port from EC2
+      VpcId: !Ref MyVPC
+      Tags:
+        - Key: Name
+          Value: !Sub MyRDSSG-${cfnBase}
+
+#--------------------------------------------#
+# RDS Security Group Ingress
+#--------------------------------------------#
+  RDSSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RDSEC2SecurityGroup
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      SourceSecurityGroupId: !Ref MyEC2SGtoRDS
+
+#--------------------------------------------#
+# RDS Subnet Group
+#--------------------------------------------#
+  RDSSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: RDS subnet Group
+      SubnetIds:
+        - !Ref MyPVSubnet03
+        - !Ref MyPVSubnet04
+      DBSubnetGroupName: RDSSubnetGroup
+      Tags:
+        - Key: Name
+          Value: !Sub RDSSubnetGroup-${cfnBase}
+
+#--------------------------------------------#
+# S3
+#--------------------------------------------#
+  MyS3Bucketforlearn10:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: mys3bucketforlearn10                #バケット名はグローバルで一意でなければならない。大文字は使用不可
+      PublicAccessBlockConfiguration:                 #パブリックアクセスを全て拒否
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      BucketEncryption:                               #デフォルトの暗号化設定、S3管理のSSE-S3
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Name
+          Value: !Sub MyS3Bucketforlearn10-${cfnBase}
+
+#--------------------------------------------#
+# EC2 to S3 Endpoint
+#--------------------------------------------#
+  EC2toS3EndPoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      VpcEndpointType: Gateway                     #S3とのエンドポイントに使用するためGateway
+      VpcId: !Ref MyVPC
+      RouteTableIds:
+        - !Ref MyRouteTable
+
+#--------------------------------------------#
+# outputs
+#--------------------------------------------#
+Outputs:
+  MyVPC:
+    Value: !Ref MyVPC
+    Description: CreateVPCbase
+  MyPublicSubnet01:
+    Value: !Ref MyPBSubnet01
+    Description: CreatePublicSubnet01
+  MyPublicSubnet02:
+    Value: !Ref MyPBSubnet02
+    Description: CreatePublicSubnet02
+  MyPrivateSubnet03:
+    Value: !Ref MyPVSubnet03
+    Description: CreatePrivateSubnet03
+  MyPrivateSubnet04:
+    Value: !Ref MyPVSubnet04
+    Description: CreatePrivateSubnet04
+  MyEC2:
+    Value: !Ref MyEC2
+    Description: CreateEC2
+  MyEC2AZ:
+    Value: !GetAtt MyEC2.AvailabilityZone
+    Description: MyEC2AZ
+  RDSHostname:
+    Description: RDS Hostname
+    Value: !GetAtt 
+      - MyRDS
+      - Endpoint.Address
+  RDSPort:
+    Description: RDS Port
+    Value: !GetAtt 
+      - MyRDS
+      - Endpoint.Port
+  RDSSubnetGroup:
+    Description: RDS Subnet Group Create
+    Value: !Ref RDSSubnetGroup
+  RDSAccessSecurityGroup:
+    Description: RDS Access Security Group Create
+    Value: !Ref RDSEC2SecurityGroup
+  HTTPWebSiteURL:                                  #Webサーバのアクセス用の URL を出力
+    Value: !GetAtt MyALB.DNSName                   #ALBのURLを出力する場合、組み込み関数の!GetAttを使用し.DNSNameで取得
+  S3name:
+    Value: !Ref MyS3Bucketforlearn10
+    Description: MyS3Bucketforlearn10
