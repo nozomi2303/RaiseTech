@@ -3,7 +3,7 @@
 ### CloudFormationを使用してこれまでの環境をコード化する
 
 
-* VPC-Subnet-RouteTabele-IGW  
+#### VPC-Subnet-RouteTabele-IGW  
 
 ```
   MyVPC:
@@ -17,6 +17,8 @@
           Value: !Sub VPC-${cfnBase}
 ```  
 ![VPC](images/myvpc-cfn.png)   
+
+***
 
 ```
   MyPBSubnet01:
@@ -62,6 +64,8 @@
 ```
 ![subnet](images/myvpc-subnet-cfn.png)   
 
+***
+
 ```
   MyIGW:
     Type: AWS::EC2::InternetGateway  
@@ -77,6 +81,8 @@
       InternetGatewayId: !Ref MyIGW
 ```
 ![igw](images/igw-cfn.png)   
+
+***
 
 ```
   MyRouteTable:
@@ -128,9 +134,10 @@
 ```
 ![myroutepb](images/myroutepb-cfn.png)   
 ![myroutepv](images/myroutepv-cfn.png)   
+
 ***
 
-* EC2-EC2SecurityGroup  
+#### EC2-EC2SecurityGroup  
 
 ```
   MyEC2:
@@ -167,6 +174,8 @@
 ```
 ![EC2](images/myec2-cfn.png)   
 
+***
+
 ```
   MyEC2SG:
     Type: AWS::EC2::SecurityGroup
@@ -193,6 +202,8 @@
 ```
 ![EC2SG](images/myec2-sg-cfn.png)   
 
+***
+
 ```
  MyEC2SGtoRDS:
     Type: AWS::EC2::SecurityGroup
@@ -211,9 +222,9 @@
 ```
 ![EC2SG-RDS](images/myec2-to-rds-sg-cfn.png)   
 
-
 ***
-* RDS-RDSSecurityGroup  
+
+#### RDS-RDSSecurityGroup  
 
 ```
   MyRDS:
@@ -243,6 +254,8 @@
 ![RDS](images/myrds-cfn.png)    
 ![RDS-1](images/myrds-1-cfn.png)    
 
+***
+
 ```
   RDSEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -268,9 +281,9 @@
 
 ![RDSSG](images/myrds-sg-cfn.png)    
 
-
 ***
-* ALB-TargetGroup  
+
+#### ALB-TargetGroup  
 
 ```
   MyALB:
@@ -288,6 +301,9 @@
         - Key: Name
           Value: !Sub MyALB-${cfnBase}
  ```
+
+***
+
 ![ALB](images/myalb-cfn.png)    
 
 ```  MyALBSG:
@@ -307,6 +323,8 @@
 ```
 
 ![ALB](images/myalb-sg-cfn.png)    
+
+***
 
 ```  TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup 
@@ -345,10 +363,9 @@
 ```
 ![ALB-tg](images/myalb-target-cfn.png)    
 
-
 ***
 
-* IAMRole  
+#### IAMRole  
 
 ```
   MyIamRole:
@@ -377,10 +394,9 @@
 ```
 ![IAM](images/iam-s3-cfn.png)    
 
-
 ***
 
-* S3-S3EndPoint  
+#### S3-S3EndPoint  
 
 ```  
   MyS3Bucketforlearn10:
@@ -402,6 +418,8 @@
 ```
 ![S3](images/mys3-cfn.png)    
 
+***
+
 ```  
   EC2toS3EndPoint:
     Type: AWS::EC2::VPCEndpoint
@@ -416,11 +434,11 @@
 
 
 ***
-
-* EC2からRDSへ接続確認  
+#### EC2からRDSへ接続確認  
 
 ![EC2connect](images/ec2-to-rds-connect-cfn.png)    
 
+***
 
 ### 第10回を終えての所感  
  
