@@ -59,7 +59,6 @@
       Tags:
         - Key: Name
           Value: !Sub MyPVSubnet04-${cfnBase}
-
 ```
 ![subnet](images/myvpc-subnet-cfn.png)   
 
@@ -76,7 +75,10 @@
     Properties:
       VpcId: !Ref MyVPC
       InternetGatewayId: !Ref MyIGW
+```
+![igw](images/igw-cfn.png)   
 
+```
   MyRouteTable:
     Type: AWS::EC2::RouteTable                     
     Properties:
@@ -84,6 +86,7 @@
       Tags:
         - Key: Name
           Value: MyRouteTablepublic
+  
   MyRouteTableprivate:
     Type: AWS::EC2::RouteTable                     
     Properties:
@@ -104,24 +107,27 @@
     Properties:
       SubnetId: !Ref MyPBSubnet01
       RouteTableId: !Ref MyRouteTable
+
   RouteTableAssocPublic02:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref MyPBSubnet02
       RouteTableId: !Ref MyRouteTable
+
   RouteTableAssocPrivate03:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref MyPVSubnet03
       RouteTableId: !Ref MyRouteTableprivate
+
   RouteTableAssocPrivate04:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref MyPVSubnet04
       RouteTableId: !Ref MyRouteTableprivate
 ```
-
-
+![myroutepb](images/myroutepb-cfn.png)   
+![myroutepv](images/myroutepv-cfn.png)   
 ***
 
 * EC2-EC2SecurityGroup  
