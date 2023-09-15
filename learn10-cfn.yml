@@ -6,19 +6,19 @@ Parameters:
     Description: this is VPC base name.
     Type: String
     Default: fromCFn
-  VPCcider:
+  VPCCIDR:
     Type: String
     Default: 10.0.0.0/16
-  PBSubnetcider01:
+  PBSubnetCIDR01:
     Type: String
     Default: 10.0.16.0/24
-  PBSubnetcider02: 
+  PBSubnetCIDR02: 
     Type: String
     Default: 10.0.2.0/24
-  PVSubnetcider03: 
+  PVSubnetCIDR03: 
     Type: String
     Default: 10.0.128.0/24
-  PVSubnetcider04: 
+  PVSubnetCIDR04: 
     Type: String
     Default: 10.0.144.0/24
   EC2Base:
@@ -28,10 +28,6 @@ Parameters:
   InstanceTypeParameter:
     Type: String
     Default: t2.micro
-    AllowedValues:
-       - "t2.micro"
-       - "m1.small"
-       - "m1.large"
     Description: Default t2.micro
   KeyName:
     Description: EC2KeyPair
@@ -40,8 +36,8 @@ Parameters:
     Description: My IP adress
     Type: String
   LatestAmiId :
-    Type : AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+    Type : Latest Ami ID
+    Default: ami-0c41c5b801cec8c3c
   SGBase:
     Description: this is SecurityGroup.
     Type: String
@@ -66,7 +62,7 @@ Resources:
   MyVPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VPCcider                     #CidrBlockまたはIpv4IpamPoolIdのいずれかを指定しなければならない
+      CidrBlock: !Ref VPCCIDR                      #CidrBlockまたはIpv4IpamPoolIdのいずれかを指定しなければならない
       EnableDnsSupport: true                       #VPC で起動したインスタンスが DNS ホスト名を取得するかどうかを示す
       EnableDnsHostnames: true                     #VPCでDNS解決がサポートされているかどうかを示す
       Tags:
@@ -81,8 +77,8 @@ Resources:
     Properties:
       AvailabilityZone: ap-northeast-1a
       VpcId: !Ref MyVPC
-      CidrBlock: !Ref PBSubnetcider01               #サブネットに割り当てられたIPv4 CIDRブロック。更新すると新しいsubnetが作成され、既存のsubnetは削除される
-      MapPublicIpOnLaunch: true                   #PVSubnetで起動されたインスタンスがパブリックIPv4アドレスを受け取るかどうか
+      CidrBlock: !Ref PBSubnetCIDR01               #サブネットに割り当てられたIPv4 CIDRブロック。更新すると新しいsubnetが作成され、既存のsubnetは削除される
+      MapPublicIpOnLaunch: true                    #PVSubnetで起動されたインスタンスがパブリックIPv4アドレスを受け取るかどうか
       Tags:
         - Key: Name
           Value: !Sub MyPBSubnet01-${cfnBase}
@@ -91,7 +87,7 @@ Resources:
     Properties:
       AvailabilityZone: ap-northeast-1c
       VpcId: !Ref MyVPC
-      CidrBlock: !Ref PBSubnetcider02
+      CidrBlock: !Ref PBSubnetCIDR02
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
@@ -104,7 +100,7 @@ Resources:
     Properties:
       AvailabilityZone: ap-northeast-1a            #必須ではない
       VpcId: !Ref MyVPC
-      CidrBlock: !Ref PVSubnetcider03              #サブネットに割り当てられたIPv4 CIDRブロック。更新すると新しいsubnetが作成され、既存のsubnetは削除される
+      CidrBlock: !Ref PVSubnetCIDR03               #サブネットに割り当てられたIPv4 CIDRブロック。更新すると新しいsubnetが作成され、既存のsubnetは削除される
       MapPublicIpOnLaunch: false                   #PVSubnetで起動されたインスタンスがパブリックIPv4アドレスを受け取るかどうか
       Tags:
         - Key: Name
@@ -115,7 +111,7 @@ Resources:
     Properties:
       AvailabilityZone: ap-northeast-1c
       VpcId: !Ref MyVPC
-      CidrBlock: !Ref PVSubnetcider04
+      CidrBlock: !Ref PVSubnetCIDR04
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name

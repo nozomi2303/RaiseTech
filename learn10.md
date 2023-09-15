@@ -9,7 +9,7 @@
   MyVPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VPCcider   
+      CidrBlock: !Ref VPCCIDR
       EnableDnsSupport: true     
       EnableDnsHostnames: true  
       Tags:
@@ -26,7 +26,7 @@
     Properties:
       AvailabilityZone: ap-northeast-1a
       VpcId: !Ref MyVPC
-      CidrBlock: !Ref PBSubnetcider01  
+      CidrBlock: !Ref PBSubnetCIDR01  
       MapPublicIpOnLaunch: true   
       Tags:
         - Key: Name
@@ -36,7 +36,7 @@
     Properties:
       AvailabilityZone: ap-northeast-1c
       VpcId: !Ref MyVPC
-      CidrBlock: !Ref PBSubnetcider02
+      CidrBlock: !Ref PBSubnetCIDR02
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
@@ -46,7 +46,7 @@
     Properties:
       AvailabilityZone: ap-northeast-1a   
       VpcId: !Ref MyVPC
-      CidrBlock: !Ref PVSubnetcider03   
+      CidrBlock: !Ref PVSubnetCIDR03   
       MapPublicIpOnLaunch: false  
       Tags:
         - Key: Name
@@ -56,7 +56,7 @@
     Properties:
       AvailabilityZone: ap-northeast-1c
       VpcId: !Ref MyVPC
-      CidrBlock: !Ref PVSubnetcider04
+      CidrBlock: !Ref PVSubnetCIDR04
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
