@@ -10,15 +10,16 @@
 |6月|49.75時間|
 |7月|73.25時間|
 |8月|78.45時間|
-|9月||
+|9月|77.30時間|
+|10月|88.0時間|
 
-BuildUP：```URL```
+BuildUP：```https://app.build-up.info/enterprises/bEDI6AXZ/portfolio/bQM0cTMgoTd```
 
 |講義|MarkDown|学習内容|
 |---|---|---|
 |第1回|learn01.md|AWSアカウント作成、IAMの作成、MFA認証設定、Builling閲覧設定、Cloud9でHelloWorldを表示|
 |第2回|learn02.md|GitHubでMarkDownファイル作成からプルリクエストまで|
-|第3回|learn03.md|Cloud9にサンプルアプリケーション（Ruby on Rails）をデプロイ|
+|第3回|learn03.md　learn03-aboutserver.md|Cloud9にサンプルアプリケーション（Ruby on Rails）をデプロイ|
 |第4回|learn04.md|VPC作成、EC2（Linux2）作成、とRDS（MySQL）作成、EC2からRDSを接続|
 |第5回|learn05.md|EC2上にRuby on Railsアプリケーションをデプロイ、NginXとUnicornを組み込む、ELB（ALB）を経由する設定をする　、S3へ画像を保存、インフラの構成図作成|
 |第6回|learn06.md|CloudTrail、CloudWatchアラームでALBのアラーム設定、Calculatorで見積書の作成|
