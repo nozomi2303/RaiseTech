@@ -59,7 +59,8 @@
 
 ### 第3回　【2023/04/21提出済み】
 
-[■ learn03.md](https://github.com/nozomi2303/RaiseTech/blob/main/learn03.md) 　[learn03-aboutserver.md](https://github.com/nozomi2303/RaiseTech/blob/main/learn03-aboutserver.md)
+[■ learn03.md](https://github.com/nozomi2303/RaiseTech/blob/main/learn03.md)  
+[■ learn03-aboutserver.md](https://github.com/nozomi2303/RaiseTech/blob/main/learn03-aboutserver.md)
 
 
 * Cloud9上にRuby on Railsで作成されたサンプルアプリケーションをデプロイ
