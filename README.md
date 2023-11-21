@@ -3,6 +3,7 @@
 
 * 2023年3月18日よりエンジニアスクールRaiseTechにてAWSの学習を開始  
 * このリポジトリは課題提出用に作成されました
+* AWS Certified Solutions Architect - Associate　【2023年10月30日取得】
 
 ## 学習時間
 
