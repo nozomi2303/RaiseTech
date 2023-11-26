@@ -93,7 +93,10 @@
 * ELB（ALB）による負荷分散機能を設定し、ヘルスチェックを確認
 * S3へ画像アップロード機能を追加
   * EC2にインスタンスプロファイルを付与する
-* 今回作成したインフラ環境の構成図を作る
+* 今回作成したインフラ環境の構成図を作る  
+
+![構成図](images/fruitsapp.png) 
+
 
 ---
 
@@ -568,13 +571,9 @@
 * EC2からRDSへ接続確認  
 
 ![EC2connect](images/ec2-to-rds-connect-cfn.png)    
+ 
 
-
-* CloudFormationで作成した環境の構成図  
-
-![構成図](images/fruitsapp.png) 
   
-
 
 ---
 
